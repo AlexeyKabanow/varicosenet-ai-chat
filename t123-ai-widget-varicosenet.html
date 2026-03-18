@@ -1,0 +1,762 @@
+<style>
+  #vz-ai-chat {
+    --vz-bg: #f4f8ff;
+    --vz-surface: #ffffff;
+    --vz-surface-soft: #f7faff;
+    --vz-text: #2e65a8;
+    --vz-muted: #64789f;
+    --vz-line: rgba(46, 101, 168, 0.12);
+    --vz-accent: #ea008a;
+    --vz-accent-dark: #c60075;
+    --vz-ok: #2d7e57;
+    --vz-error: #b64d45;
+    --vz-shadow: 0 30px 80px rgba(46, 101, 168, 0.14);
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    font-family: "TildaSans", Arial, sans-serif;
+    color: var(--vz-text);
+  }
+
+  #vz-ai-chat * {
+    box-sizing: border-box;
+  }
+
+  #vz-ai-chat .vz-shell {
+    overflow: hidden;
+    border: 1px solid rgba(46, 101, 168, 0.08);
+    border-radius: 36px;
+    background:
+      radial-gradient(circle at top right, rgba(234, 0, 138, 0.08), transparent 22%),
+      linear-gradient(145deg, #fefeff 0%, #eef5ff 100%);
+    box-shadow: var(--vz-shadow);
+  }
+
+  #vz-ai-chat .vz-grid {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.92fr) minmax(380px, 1.08fr);
+    gap: 0;
+  }
+
+  #vz-ai-chat .vz-side {
+    padding: 36px 34px;
+    border-right: 1px solid rgba(46, 101, 168, 0.08);
+  }
+
+  #vz-ai-chat .vz-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(234, 0, 138, 0.08);
+    color: var(--vz-accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  #vz-ai-chat h2 {
+    margin: 0 0 16px;
+    font-size: clamp(38px, 5vw, 58px);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+
+  #vz-ai-chat .vz-lead {
+    margin: 0 0 20px;
+    color: var(--vz-muted);
+    font-size: 18px;
+    line-height: 1.62;
+  }
+
+  #vz-ai-chat .vz-list {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  #vz-ai-chat .vz-item {
+    padding: 14px 16px;
+    border: 1px solid rgba(46, 101, 168, 0.09);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  #vz-ai-chat .vz-item strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  #vz-ai-chat .vz-item span {
+    color: var(--vz-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  #vz-ai-chat .vz-side-note {
+    color: var(--vz-muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  #vz-ai-chat .vz-chat {
+    display: flex;
+    flex-direction: column;
+    min-height: 720px;
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  #vz-ai-chat .vz-chat-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--vz-line);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(10px);
+  }
+
+  #vz-ai-chat .vz-agent {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #vz-ai-chat .vz-avatar {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--vz-accent), #ff65b5);
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  #vz-ai-chat .vz-agent strong,
+  #vz-ai-chat .vz-agent span {
+    display: block;
+  }
+
+  #vz-ai-chat .vz-agent strong {
+    font-size: 16px;
+  }
+
+  #vz-ai-chat .vz-agent span,
+  #vz-ai-chat .vz-state {
+    color: var(--vz-muted);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  #vz-ai-chat .vz-messages {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 22px 24px 10px;
+    display: grid;
+    gap: 12px;
+    background:
+      radial-gradient(circle at bottom left, rgba(46, 101, 168, 0.04), transparent 24%),
+      linear-gradient(180deg, var(--vz-bg) 0%, #f8fbff 100%);
+  }
+
+  #vz-ai-chat .vz-msg {
+    max-width: 86%;
+    padding: 15px 17px;
+    border-radius: 22px;
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+
+  #vz-ai-chat .vz-msg-bot {
+    justify-self: start;
+    border: 1px solid rgba(46, 101, 168, 0.1);
+    background: #ffffff;
+  }
+
+  #vz-ai-chat .vz-msg-user {
+    justify-self: end;
+    background: linear-gradient(135deg, var(--vz-accent), var(--vz-accent-dark));
+    color: #ffffff;
+  }
+
+  #vz-ai-chat .vz-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 24px 18px;
+    background: var(--vz-bg);
+  }
+
+  #vz-ai-chat .vz-chip {
+    border: 1px solid var(--vz-line);
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--vz-text);
+    padding: 10px 14px;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+  #vz-ai-chat .vz-chip:hover {
+    transform: translateY(-1px);
+    border-color: rgba(234, 0, 138, 0.28);
+    background: rgba(234, 0, 138, 0.04);
+  }
+
+  #vz-ai-chat .vz-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 18px 24px 18px;
+    border-top: 1px solid var(--vz-line);
+    background: #ffffff;
+  }
+
+  #vz-ai-chat .vz-form textarea {
+    min-height: 64px;
+    max-height: 180px;
+    resize: vertical;
+    padding: 16px 18px;
+    border: 1px solid var(--vz-line);
+    border-radius: 18px;
+    background: #ffffff;
+    color: var(--vz-text);
+    font: inherit;
+    outline: none;
+  }
+
+  #vz-ai-chat .vz-form textarea:focus {
+    border-color: rgba(234, 0, 138, 0.34);
+    box-shadow: 0 0 0 4px rgba(234, 0, 138, 0.08);
+  }
+
+  #vz-ai-chat .vz-send {
+    align-self: end;
+    min-width: 150px;
+    min-height: 64px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--vz-accent), var(--vz-accent-dark));
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  #vz-ai-chat .vz-send:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  #vz-ai-chat .vz-status {
+    padding: 0 24px 20px;
+    background: #ffffff;
+    color: var(--vz-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 40px;
+  }
+
+  #vz-ai-chat .vz-status.vz-ok {
+    color: var(--vz-ok);
+  }
+
+  #vz-ai-chat .vz-status.vz-error {
+    color: var(--vz-error);
+  }
+
+  #vz-ai-chat .vz-leadbox {
+    display: none;
+    margin: 0 24px 18px;
+    padding: 18px;
+    border: 1px solid rgba(234, 0, 138, 0.14);
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(234, 0, 138, 0.05), rgba(46, 101, 168, 0.04));
+  }
+
+  #vz-ai-chat .vz-leadbox.is-visible {
+    display: block;
+  }
+
+  #vz-ai-chat .vz-leadbox-head {
+    margin-bottom: 14px;
+  }
+
+  #vz-ai-chat .vz-leadbox-head strong,
+  #vz-ai-chat .vz-leadbox-head span {
+    display: block;
+  }
+
+  #vz-ai-chat .vz-leadbox-head strong {
+    margin-bottom: 4px;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  #vz-ai-chat .vz-leadbox-head span {
+    color: var(--vz-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  #vz-ai-chat .vz-leadform {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+  }
+
+  #vz-ai-chat .vz-leadform input {
+    min-width: 0;
+    height: 52px;
+    padding: 0 14px;
+    border: 1px solid var(--vz-line);
+    border-radius: 14px;
+    background: #ffffff;
+    color: var(--vz-text);
+    font: inherit;
+    outline: none;
+  }
+
+  #vz-ai-chat .vz-leadform input:focus {
+    border-color: rgba(234, 0, 138, 0.34);
+    box-shadow: 0 0 0 4px rgba(234, 0, 138, 0.08);
+  }
+
+  #vz-ai-chat .vz-leadsubmit {
+    min-width: 170px;
+    height: 52px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--vz-accent), var(--vz-accent-dark));
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  #vz-ai-chat .vz-leadsubmit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  #vz-ai-chat .vz-leadhint {
+    margin-top: 10px;
+    color: var(--vz-muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 980px) {
+    #vz-ai-chat .vz-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #vz-ai-chat .vz-side {
+      border-right: 0;
+      border-bottom: 1px solid rgba(46, 101, 168, 0.08);
+    }
+
+    #vz-ai-chat .vz-chat {
+      min-height: 680px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    #vz-ai-chat .vz-shell {
+      border-radius: 24px;
+    }
+
+    #vz-ai-chat .vz-side,
+    #vz-ai-chat .vz-chat-head,
+    #vz-ai-chat .vz-messages,
+    #vz-ai-chat .vz-quick,
+    #vz-ai-chat .vz-leadbox,
+    #vz-ai-chat .vz-form,
+    #vz-ai-chat .vz-status {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    #vz-ai-chat .vz-leadbox {
+      margin-left: 16px;
+      margin-right: 16px;
+    }
+
+    #vz-ai-chat .vz-form {
+      grid-template-columns: 1fr;
+    }
+
+    #vz-ai-chat .vz-leadform {
+      grid-template-columns: 1fr;
+    }
+
+    #vz-ai-chat .vz-send {
+      width: 100%;
+    }
+
+    #vz-ai-chat .vz-msg {
+      max-width: 100%;
+      font-size: 14px;
+    }
+  }
+</style>
+
+<section id="vz-ai-chat">
+  <div class="vz-shell">
+    <div class="vz-grid">
+      <div class="vz-side">
+        <div class="vz-badge">AI-виджет через T123</div>
+        <h2>Умный бот для лендинга клиники</h2>
+        <p class="vz-lead">
+          Бот отвечает на вопросы о симптомах, консультации флеболога, УЗИ вен, подготовке к приему и мягко переводит посетителя к записи.
+        </p>
+
+        <div class="vz-list">
+          <div class="vz-item">
+            <strong>Работает в Tilda</strong>
+            <span>Этот блок целиком вставляется в `T123` и не требует сторонних виджетов.</span>
+          </div>
+          <div class="vz-item">
+            <strong>AI отвечает по правилам клиники</strong>
+            <span>Сценарий и тон задаются на сервере: можно запретить диагнозы, назначение лекарств и опасные советы.</span>
+          </div>
+          <div class="vz-item">
+            <strong>Безопасная архитектура</strong>
+            <span>Ключ OpenAI хранится только на сервере, а браузер общается лишь с вашим endpoint.</span>
+          </div>
+        </div>
+
+        <div class="vz-side-note">
+          Перед публикацией замените `apiUrl`, ссылки на запись и телефон. Если сервер недоступен, блок покажет понятную ошибку, а не сломается молча.
+        </div>
+      </div>
+
+      <div class="vz-chat">
+        <div class="vz-chat-head">
+          <div class="vz-agent">
+            <div class="vz-avatar">AI</div>
+            <div>
+              <strong>Умный помощник клиники</strong>
+              <span>Отвечает на частые вопросы и помогает с записью</span>
+            </div>
+          </div>
+          <div class="vz-state">Онлайн сейчас</div>
+        </div>
+
+        <div class="vz-messages" id="vz-ai-messages"></div>
+
+        <div class="vz-quick" id="vz-ai-quick">
+          <button class="vz-chip" type="button" data-prompt="Какие симптомы варикоза нельзя игнорировать?">Какие симптомы важны?</button>
+          <button class="vz-chip" type="button" data-prompt="Как проходит консультация флеболога и УЗИ вен?">Как проходит прием?</button>
+          <button class="vz-chip" type="button" data-prompt="Нужно ли заранее делать УЗИ вен в другом месте?">Нужно ли заранее УЗИ?</button>
+          <button class="vz-chip" type="button" data-prompt="Как подготовиться к первичному приему?">Как подготовиться?</button>
+        </div>
+
+        <div class="vz-leadbox" id="vz-ai-leadbox">
+          <div class="vz-leadbox-head">
+            <strong>Можем помочь с записью</strong>
+            <span>Оставьте имя и телефон, и администратор клиники свяжется с вами, чтобы подобрать удобное время.</span>
+          </div>
+
+          <form class="vz-leadform" id="vz-ai-leadform">
+            <input id="vz-ai-lead-name" type="text" placeholder="Ваше имя" />
+            <input id="vz-ai-lead-phone" type="tel" placeholder="+7 (___) ___-__-__" />
+            <button class="vz-leadsubmit" id="vz-ai-leadsubmit" type="submit">Оставить контакт</button>
+          </form>
+
+          <div class="vz-leadhint" id="vz-ai-leadhint">
+            Нажимая кнопку, посетитель передает контакт для обратной связи по консультации.
+          </div>
+        </div>
+
+        <form class="vz-form" id="vz-ai-form">
+          <textarea id="vz-ai-input" placeholder="Напишите вопрос, например: у меня тяжесть в ногах и сосудистые звездочки, стоит ли записаться?"></textarea>
+          <button class="vz-send" id="vz-ai-send" type="submit">Спросить</button>
+        </form>
+
+        <div class="vz-status" id="vz-ai-status"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var config = window.VARICOSENET_AI_CHAT_CONFIG || {};
+    var apiUrl = config.apiUrl || "https://YOUR-DOMAIN.RU/api/varicosenet-chat";
+    var bookingUrl = config.bookingUrl || "#popup:consultation";
+    var phoneUrl = config.phoneUrl || "tel:+74752431521";
+    var siteName = config.siteName || "Варикоза нет";
+    var metricaCounterId = config.metricaCounterId || null;
+    var metricaLeadGoal = config.metricaLeadGoal || "chat_lead_sent";
+
+    var messagesEl = document.getElementById("vz-ai-messages");
+    var formEl = document.getElementById("vz-ai-form");
+    var inputEl = document.getElementById("vz-ai-input");
+    var sendEl = document.getElementById("vz-ai-send");
+    var statusEl = document.getElementById("vz-ai-status");
+    var quickEl = document.getElementById("vz-ai-quick");
+    var leadBoxEl = document.getElementById("vz-ai-leadbox");
+    var leadFormEl = document.getElementById("vz-ai-leadform");
+    var leadNameEl = document.getElementById("vz-ai-lead-name");
+    var leadPhoneEl = document.getElementById("vz-ai-lead-phone");
+    var leadSubmitEl = document.getElementById("vz-ai-leadsubmit");
+    var leadHintEl = document.getElementById("vz-ai-leadhint");
+
+    if (!messagesEl || !formEl || !inputEl || !sendEl || !statusEl || !quickEl || !leadBoxEl || !leadFormEl) {
+      return;
+    }
+
+    var state = {
+      conversationId: null,
+      history: [],
+      turns: 0,
+      leadShown: false,
+      leadSent: false
+    };
+
+    function setStatus(text, type) {
+      statusEl.textContent = text || "";
+      statusEl.className = "vz-status" + (type ? " " + type : "");
+    }
+
+    function addMessage(role, text) {
+      var item = document.createElement("div");
+      item.className = "vz-msg " + (role === "user" ? "vz-msg-user" : "vz-msg-bot");
+      item.textContent = text;
+      messagesEl.appendChild(item);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function addWelcome() {
+      addMessage(
+        "bot",
+        "Здравствуйте. Я AI-помощник клиники " + siteName + ". Могу подсказать по симптомам, консультации флеболога, УЗИ вен и подготовке к приему."
+      );
+      addMessage(
+        "bot",
+        "Если вопрос требует осмотра врача, я честно скажу об этом и предложу записаться на консультацию."
+      );
+    }
+
+    function setLoading(loading) {
+      sendEl.disabled = loading;
+      inputEl.disabled = loading;
+      quickEl.querySelectorAll("button").forEach(function (button) {
+        button.disabled = loading;
+      });
+    }
+
+    function setLeadLoading(loading) {
+      leadSubmitEl.disabled = loading;
+      leadNameEl.disabled = loading;
+      leadPhoneEl.disabled = loading;
+    }
+
+    function normalizePhone(phone) {
+      return String(phone || "").replace(/[^\d+]/g, "");
+    }
+
+    function isValidPhone(phone) {
+      var normalized = normalizePhone(phone);
+      return normalized.length >= 11;
+    }
+
+    function showLeadBox(reason) {
+      if (state.leadShown || state.leadSent) {
+        return;
+      }
+
+      state.leadShown = true;
+      leadBoxEl.classList.add("is-visible");
+      if (reason) {
+        addMessage("bot", reason);
+      }
+      leadBoxEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function trackLeadGoal(payload) {
+      if (!metricaCounterId || typeof window.ym !== "function") {
+        return false;
+      }
+
+      try {
+        window.ym(metricaCounterId, "reachGoal", metricaLeadGoal, payload || {});
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function buildCtaText(reply) {
+      if (!reply || !reply.suggestBooking) {
+        return "";
+      }
+
+      return "Записаться: " + bookingUrl + " | Позвонить: " + phoneUrl;
+    }
+
+    async function askBot(question) {
+      var payload = {
+        message: question,
+        conversationId: state.conversationId,
+        history: state.history.slice(-8)
+      };
+
+      var response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+      }
+
+      return response.json();
+    }
+
+    async function sendLead(payload) {
+      var response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+      }
+
+      return response.json();
+    }
+
+    async function submitQuestion(question) {
+      var cleanQuestion = (question || "").trim();
+      if (!cleanQuestion) {
+        setStatus("Введите вопрос, чтобы бот мог ответить.", "vz-error");
+        return;
+      }
+
+      addMessage("user", cleanQuestion);
+      state.history.push({ role: "user", content: cleanQuestion });
+      inputEl.value = "";
+      setStatus("Готовим ответ...", "");
+      setLoading(true);
+
+      try {
+        var data = await askBot(cleanQuestion);
+        var answer = data && data.answer ? data.answer : "Не удалось получить ответ. Попробуйте задать вопрос иначе.";
+        addMessage("bot", answer);
+        state.history.push({ role: "assistant", content: answer });
+        state.turns += 1;
+
+        if (data && data.conversationId) {
+          state.conversationId = data.conversationId;
+        }
+
+        var ctaText = buildCtaText(data);
+        setStatus(ctaText || "Ответ готов.", ctaText ? "vz-ok" : "");
+
+        if ((data && data.suggestLeadCapture) || state.turns >= 3) {
+          showLeadBox("Если хотите, я могу помочь с записью. Оставьте имя и телефон ниже, и администратор свяжется с вами.");
+        }
+      } catch (error) {
+        setStatus("Сервер недоступен или не настроен. Проверьте apiUrl в конфиге Tilda и backend endpoint.", "vz-error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    formEl.addEventListener("submit", function (event) {
+      event.preventDefault();
+      submitQuestion(inputEl.value);
+    });
+
+    quickEl.addEventListener("click", function (event) {
+      var button = event.target.closest("button[data-prompt]");
+      if (!button || button.disabled) {
+        return;
+      }
+
+      submitQuestion(button.getAttribute("data-prompt"));
+    });
+
+    leadFormEl.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      if (state.leadSent) {
+        return;
+      }
+
+      var name = (leadNameEl.value || "").trim();
+      var phone = (leadPhoneEl.value || "").trim();
+
+      if (!name) {
+        setStatus("Введите имя, чтобы мы могли корректно оформить обращение.", "vz-error");
+        return;
+      }
+
+      if (!isValidPhone(phone)) {
+        setStatus("Введите телефон в корректном формате.", "vz-error");
+        return;
+      }
+
+      setLeadLoading(true);
+      setStatus("Отправляем контакт администратору...", "");
+
+      try {
+        var data = await sendLead({
+          action: "lead",
+          name: name,
+          phone: phone,
+          conversationId: state.conversationId,
+          history: state.history.slice(-8),
+          source: "tilda-ai-widget",
+          page: window.location.href
+        });
+
+        state.leadSent = true;
+        leadBoxEl.classList.remove("is-visible");
+        addMessage("user", "Оставляю контакт: " + name + ", " + phone);
+        addMessage("bot", "Спасибо. Контакт передан администратору. С вами свяжутся, чтобы подобрать удобное время для консультации.");
+        var metricaTracked = trackLeadGoal({
+          source: "tilda-ai-widget",
+          channel: "ai-chat-lead"
+        });
+        setStatus(metricaTracked ? "Лид отправлен успешно. Цель в Метрике зафиксирована." : "Лид отправлен успешно.", "vz-ok");
+
+        if (leadHintEl && data && data.telegramDelivered) {
+          leadHintEl.textContent = data.webhookDelivered
+            ? "Заявка отправлена. Уведомление доставлено в Telegram и CRM webhook."
+            : "Заявка отправлена. Уведомление доставлено в Telegram.";
+        } else if (leadHintEl && data && data.webhookDelivered) {
+          leadHintEl.textContent = "Заявка отправлена. Данные переданы в CRM webhook.";
+        }
+      } catch (error) {
+        setStatus("Не удалось отправить контакт. Проверьте настройки backend, Telegram и CRM webhook.", "vz-error");
+      } finally {
+        setLeadLoading(false);
+      }
+    });
+
+    addWelcome();
+  })();
+</script>
