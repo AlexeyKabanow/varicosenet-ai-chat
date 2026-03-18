@@ -142,7 +142,7 @@ function buildInput(history, message) {
   return items;
 }
 
-export default async function handler(request) {
+async function handleRequest(request) {
   const origin = request.headers.get("origin") || "*";
 
   if (request.method === "OPTIONS") {
@@ -271,4 +271,30 @@ export default async function handler(request) {
       origin
     );
   }
+}
+
+export async function GET(request) {
+  const origin = request.headers.get("origin") || "*";
+
+  return json(
+    200,
+    {
+      ok: true,
+      message: "Varicosenet chat endpoint is running. Use POST to send chat messages or leads."
+    },
+    origin
+  );
+}
+
+export async function POST(request) {
+  return handleRequest(request);
+}
+
+export async function OPTIONS(request) {
+  const origin = request.headers.get("origin") || "*";
+
+  return new Response(null, {
+    status: 204,
+    headers: getCorsHeaders(origin)
+  });
 }
